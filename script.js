@@ -1,12 +1,15 @@
 /**
- * Abacus Classes — Core Application Script
- * Clean, production-ready vanilla JavaScript (Zero dependencies)
+ * ============================================================================
+ * ABACUS CLASSES — INTERACTIVE SCRIPT
+ * ============================================================================
+ * Adapted with VK-Coaching-RECORDS interactive logic.
+ * Zero external libraries, lightning-fast vanilla JavaScript.
  */
 
-// ==========================================================================
-// 1. CENTRALIZED BUSINESS CONFIGURATION
-// All editable business text, phone numbers, and placeholders are kept here.
-// ==========================================================================
+// ============================================================================
+// 1. BUSINESS CONFIGURATION OBJECT
+// All editable business details, phone numbers, and placeholders are kept here.
+// ============================================================================
 const CONFIG = {
   // Brand Identity
   BUSINESS_NAME: "Abacus Classes", // Change to "Advik Abacus Classes" anytime
@@ -14,7 +17,7 @@ const CONFIG = {
   LOCATION_SHORT: "Gulabra, Chhindwara, MP 480001",
   MAPS_URL: "https://www.google.com/maps/search/?api=1&query=Gulabra%2C+Chhindwara%2C+Madhya+Pradesh+480001",
 
-  // Phone & WhatsApp
+  // Contact Details
   PHONE_DISPLAY: "+91 97543 74490",
   PHONE_RAW: "+919754374490",
   WHATSAPP_NUMBER: "919754374490",
@@ -28,30 +31,30 @@ const CONFIG = {
   EMAIL_PLACEHOLDER: "[Add email]",
 
   // Founding Batch Offer Banner
-  SHOW_FOUNDING_OFFER: true, // Set to false to hide the banner
+  SHOW_FOUNDING_OFFER: true,
   OFFER_BADGE: "Founding Batch Enrollment",
   OFFER_TITLE: "Special Introductory Offer for Early Registrations",
   OFFER_DETAILS: "[Add offer details: Special introductory fee concession for the first 15 admissions + Free Abacus Starter Kit]",
 
-  // Google Sheets via Apps Script Web App Endpoint
-  // Paste your published Web App URL here to automatically log submissions. Leave empty ("") if using WhatsApp only.
+  // Google Sheets Webhook endpoint (Leave empty "" if using WhatsApp only)
   FORM_ENDPOINT: ""
 };
 
-// ==========================================================================
+// ============================================================================
 // 2. DOM INITIALIZATION
-// ==========================================================================
+// ============================================================================
 document.addEventListener("DOMContentLoaded", () => {
   injectBusinessConfig();
   initStickyHeader();
   initMobileNavigation();
   initFAQAccordion();
+  initInteractiveAbacusBeads();
   initDemoBookingForm();
   initSmoothScrollOffsets();
 });
 
 /**
- * Injects dynamic business values from CONFIG into the page
+ * Injects dynamic business values from CONFIG into DOM elements
  */
 function injectBusinessConfig() {
   // Business Name
@@ -59,7 +62,7 @@ function injectBusinessConfig() {
     el.textContent = CONFIG.BUSINESS_NAME;
   });
 
-  // Phone Displays & Links
+  // Phone Displays & Tel Links
   document.querySelectorAll(".phone-display-dyn").forEach(el => {
     el.textContent = CONFIG.PHONE_DISPLAY;
   });
@@ -118,15 +121,15 @@ function injectBusinessConfig() {
   }
 }
 
-// ==========================================================================
-// 3. STICKY HEADER SCROLL STATE
-// ==========================================================================
+// ============================================================================
+// 3. STICKY HEADER SCROLL
+// ============================================================================
 function initStickyHeader() {
   const header = document.querySelector(".site-header");
   if (!header) return;
 
   const onScroll = () => {
-    if (window.scrollY > 20) {
+    if (window.scrollY > 15) {
       header.classList.add("scrolled");
     } else {
       header.classList.remove("scrolled");
@@ -137,13 +140,13 @@ function initStickyHeader() {
   onScroll();
 }
 
-// ==========================================================================
+// ============================================================================
 // 4. MOBILE NAVIGATION DRAWER
-// ==========================================================================
+// ============================================================================
 function initMobileNavigation() {
-  const hamburgerBtn = document.getElementById("hamburger-btn");
-  const mobileDrawer = document.getElementById("mobile-nav-drawer");
-  const navLinks = document.querySelectorAll(".mobile-nav-link, .mobile-drawer-cta a");
+  const hamburgerBtn = document.getElementById("mobileMenuToggle");
+  const mobileDrawer = document.getElementById("mobileDrawer");
+  const navLinks = document.querySelectorAll(".mobile-nav-link, .mobile-drawer-footer a");
 
   if (!hamburgerBtn || !mobileDrawer) return;
 
@@ -156,19 +159,19 @@ function initMobileNavigation() {
 
     if (newState) {
       mobileDrawer.classList.add("open");
+      mobileDrawer.removeAttribute("hidden");
     } else {
       mobileDrawer.classList.remove("open");
+      mobileDrawer.setAttribute("hidden", "");
     }
   };
 
   hamburgerBtn.addEventListener("click", () => toggle());
 
-  // Close when clicking nav link
   navLinks.forEach(link => {
     link.addEventListener("click", () => toggle(false));
   });
 
-  // Close when clicking outside
   document.addEventListener("click", (e) => {
     if (
       mobileDrawer.classList.contains("open") &&
@@ -179,7 +182,6 @@ function initMobileNavigation() {
     }
   });
 
-  // Close on Escape key
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && mobileDrawer.classList.contains("open")) {
       toggle(false);
@@ -188,18 +190,18 @@ function initMobileNavigation() {
   });
 }
 
-// ==========================================================================
-// 5. ACCESSIBLE FAQ ACCORDION (WIDE, KEYBOARD ACCESSIBLE)
-// ==========================================================================
+// ============================================================================
+// 5. ACCESSIBLE FAQ ACCORDION
+// ============================================================================
 function initFAQAccordion() {
-  const buttons = document.querySelectorAll(".faq-toggle-btn");
+  const buttons = document.querySelectorAll(".faq-trigger-btn");
 
   buttons.forEach(btn => {
     btn.addEventListener("click", () => {
       const isExpanded = btn.getAttribute("aria-expanded") === "true";
       const pane = document.getElementById(btn.getAttribute("aria-controls"));
 
-      // Close all other panes
+      // Close other panes
       buttons.forEach(otherBtn => {
         if (otherBtn !== btn) {
           otherBtn.setAttribute("aria-expanded", "false");
@@ -218,7 +220,6 @@ function initFAQAccordion() {
       }
     });
 
-    // Keyboard support: Enter / Space
     btn.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -228,9 +229,51 @@ function initFAQAccordion() {
   });
 }
 
-// ==========================================================================
-// 6. DEMO BOOKING FORM (10-Digit Mobile, WhatsApp & Google Sheets)
-// ==========================================================================
+// ============================================================================
+// 6. INTERACTIVE ABACUS BEADS (HERO SHOWCASE)
+// Tap beads to move them up/down and update total counter
+// ============================================================================
+function initInteractiveAbacusBeads() {
+  const beads = document.querySelectorAll(".interactive-soroban-bead");
+  const scoreDisplay = document.getElementById("active-bead-score");
+  if (!beads.length) return;
+
+  beads.forEach(bead => {
+    bead.addEventListener("click", () => {
+      const isUpper = bead.classList.contains("upper-bead");
+      const baseCy = parseFloat(bead.getAttribute("data-base-cy"));
+      const currentCy = parseFloat(bead.getAttribute("cy"));
+
+      if (isUpper) {
+        // Upper deck: toggles down towards beam (value = 5)
+        const isDown = currentCy > baseCy;
+        bead.setAttribute("cy", isDown ? baseCy : baseCy + 14);
+        bead.setAttribute("data-active", isDown ? "false" : "true");
+      } else {
+        // Lower deck: toggles up towards beam (value = 1)
+        const isUp = currentCy < baseCy;
+        bead.setAttribute("cy", isUp ? baseCy : baseCy - 14);
+        bead.setAttribute("data-active", isUp ? "false" : "true");
+      }
+
+      // Calculate total count
+      let total = 0;
+      beads.forEach(b => {
+        if (b.getAttribute("data-active") === "true") {
+          total += b.classList.contains("upper-bead") ? 5 : 1;
+        }
+      });
+
+      if (scoreDisplay) {
+        scoreDisplay.textContent = total;
+      }
+    });
+  });
+}
+
+// ============================================================================
+// 7. DEMO BOOKING FORM (10-Digit Mobile, WhatsApp & Google Sheets)
+// ============================================================================
 function initDemoBookingForm() {
   const form = document.getElementById("demo-booking-form");
   const successBanner = document.getElementById("form-success-banner");
@@ -244,16 +287,16 @@ function initDemoBookingForm() {
   const courseInterest = document.getElementById("course-interest");
   const preferredTime = document.getElementById("preferred-time");
 
-  // Format phone: digits only, max 10
+  // Phone input hygiene (numbers only, max 10)
   parentPhone.addEventListener("input", (e) => {
     e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
-    clearError(parentPhone);
+    clearFieldError(parentPhone);
   });
 
-  parentName.addEventListener("input", () => clearError(parentName));
-  childAge.addEventListener("change", () => clearError(childAge));
-  courseInterest.addEventListener("change", () => clearError(courseInterest));
-  preferredTime.addEventListener("change", () => clearError(preferredTime));
+  parentName.addEventListener("input", () => clearFieldError(parentName));
+  childAge.addEventListener("change", () => clearFieldError(childAge));
+  courseInterest.addEventListener("change", () => clearFieldError(courseInterest));
+  preferredTime.addEventListener("change", () => clearFieldError(preferredTime));
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -264,49 +307,49 @@ function initDemoBookingForm() {
     // Validate Name (>= 2 chars)
     const nameVal = parentName.value.trim();
     if (!nameVal || nameVal.length < 2) {
-      showError(parentName, "Please enter your full name (minimum 2 characters)");
+      showFieldError(parentName, "Please enter your full name (minimum 2 characters)");
       isValid = false;
       firstError = firstError || parentName;
     } else {
-      clearError(parentName);
+      clearFieldError(parentName);
     }
 
-    // Validate Indian Mobile Number (10 digits starting with 6-9)
+    // Validate 10-Digit Indian Mobile (starts with 6, 7, 8, 9)
     const phoneVal = parentPhone.value.trim();
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneVal || !phoneRegex.test(phoneVal)) {
-      showError(parentPhone, "Please enter a valid 10-digit mobile number (e.g., 9876543210)");
+      showFieldError(parentPhone, "Please enter a valid 10-digit mobile number (e.g., 9876543210)");
       isValid = false;
       firstError = firstError || parentPhone;
     } else {
-      clearError(parentPhone);
+      clearFieldError(parentPhone);
     }
 
     // Validate Age
     if (!childAge.value) {
-      showError(childAge, "Please select child's age group");
+      showFieldError(childAge, "Please choose child's age group");
       isValid = false;
       firstError = firstError || childAge;
     } else {
-      clearError(childAge);
+      clearFieldError(childAge);
     }
 
     // Validate Course
     if (!courseInterest.value) {
-      showError(courseInterest, "Please select interested program");
+      showFieldError(courseInterest, "Please select an interested program");
       isValid = false;
       firstError = firstError || courseInterest;
     } else {
-      clearError(courseInterest);
+      clearFieldError(courseInterest);
     }
 
     // Validate Time Slot
     if (!preferredTime.value) {
-      showError(preferredTime, "Please choose your preferred time slot");
+      showFieldError(preferredTime, "Please choose your preferred time slot");
       isValid = false;
       firstError = firstError || preferredTime;
     } else {
-      clearError(preferredTime);
+      clearFieldError(preferredTime);
     }
 
     if (!isValid) {
@@ -314,7 +357,7 @@ function initDemoBookingForm() {
       return;
     }
 
-    // Prepare WhatsApp Message
+    // Construct structured WhatsApp message
     const details = {
       parentName: nameVal,
       phone: phoneVal,
@@ -331,14 +374,14 @@ function initDemoBookingForm() {
 *Mobile Number:* +91 ${details.phone}
 *Child's Age Group:* ${details.childAge}
 *Interested Course:* ${details.course}
-*Preferred Time Slot:* ${details.time}
+*Preferred Time:* ${details.time}
 *Location:* Gulabra, Chhindwara, MP
 ----------------------------------------
-Please share the upcoming demo class schedule. Thank you!`;
+Please confirm the upcoming free demo class slot. Thank you!`;
 
     const waUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(waText)}`;
 
-    // Optional Google Sheets logging via Apps Script
+    // Optional Google Sheets logging
     if (CONFIG.FORM_ENDPOINT && CONFIG.FORM_ENDPOINT.trim() !== "") {
       try {
         fetch(CONFIG.FORM_ENDPOINT, {
@@ -354,42 +397,42 @@ Please share the upcoming demo class schedule. Thank you!`;
 
     // Show Confirmation on Page
     if (successBanner) {
-      successBanner.classList.add("show");
+      successBanner.classList.add("visible");
       if (directWaBtn) directWaBtn.setAttribute("href", waUrl);
       form.style.display = "none";
     }
 
-    // Open WhatsApp
+    // Open WhatsApp in new tab / app
     window.open(waUrl, "_blank", "noopener,noreferrer");
   });
 }
 
-function showError(el, message) {
+function showFieldError(el, msg) {
   el.classList.add("error");
-  const group = el.closest(".input-group");
-  if (group) {
-    const err = group.querySelector(".field-error-text");
+  const block = el.closest(".input-block");
+  if (block) {
+    const err = block.querySelector(".field-error-msg");
     if (err) {
-      err.textContent = message;
-      err.classList.add("show");
+      err.textContent = msg;
+      err.classList.add("visible");
     }
   }
 }
 
-function clearError(el) {
+function clearFieldError(el) {
   el.classList.remove("error");
-  const group = el.closest(".input-group");
-  if (group) {
-    const err = group.querySelector(".field-error-text");
+  const block = el.closest(".input-block");
+  if (block) {
+    const err = block.querySelector(".field-error-msg");
     if (err) {
-      err.classList.remove("show");
+      err.classList.remove("visible");
     }
   }
 }
 
-// ==========================================================================
-// 7. SMOOTH SCROLL OFFSET FOR STICKY HEADER
-// ==========================================================================
+// ============================================================================
+// 8. SMOOTH SCROLL OFFSET FOR STICKY HEADER
+// ============================================================================
 function initSmoothScrollOffsets() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener("click", function (e) {
@@ -399,7 +442,7 @@ function initSmoothScrollOffsets() {
       const targetEl = document.querySelector(targetId);
       if (targetEl) {
         e.preventDefault();
-        const headerOffset = 90;
+        const headerOffset = 84;
         const elementPosition = targetEl.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
